@@ -11,14 +11,15 @@ public class Reswo
 	
 	private int programCounter = 0;
 	
-	public BitSet AL;
-	public BitSet AH;
-	public BitSet BL;
-	public BitSet BH;
-	public BitSet higherAdder;
-	public BitSet lowerAdder;
-	public BitSet result;
-	public BitSet resultSwapped;
+	public FixedSizeBitSet AL = bitSetFromInt(0);
+	public FixedSizeBitSet AH = bitSetFromInt(0);
+	public FixedSizeBitSet BL = bitSetFromInt(0);
+	public FixedSizeBitSet BH = bitSetFromInt(0);
+	public FixedSizeBitSet higherAdder = bitSetFromInt(0);
+	public FixedSizeBitSet lowerAdder = bitSetFromInt(0);
+	public FixedSizeBitSet result = bitSetFromInt(0);
+	public FixedSizeBitSet resultSwapped = bitSetFromInt(0);
+	public String step = "";
 	
 	public Integer getA()
 	{
@@ -57,42 +58,44 @@ public class Reswo
 	
 	public void swapOperands()
 	{
-		BitSet tempAL = AL;
+		FixedSizeBitSet tempAL = AL;
 		AL = AH;
 		AH = tempAL;
 		
-		BitSet tempBL = BL;
+		FixedSizeBitSet tempBL = BL;
 		BL = BH;
 		BH = tempBL;
 	}
 
 	public void addHigh()	// dodawanie = XOR
 	{
-		higherAdder = AH;
-		higherAdder.xor(BH);
+		Integer res = intFromBitSet(AH) + intFromBitSet(BH);
+		higherAdder = bitSetFromInt(res);
 	}
 	
 	public void addLow()
 	{
-		lowerAdder = AL;
-		lowerAdder.xor(BL);
+		Integer res = intFromBitSet(AL) + intFromBitSet(BL);
+		lowerAdder = bitSetFromInt(res);
 	}
 	
 	public void add()
 	{
-		result = lowerAdder;
-		result.xor(higherAdder);
+		Integer res = intFromBitSet(lowerAdder) + intFromBitSet(higherAdder);
+		result = bitSetFromInt(res);
 	}
 	
 	public void addSwapped()
 	{
-		resultSwapped = lowerAdder;
-		resultSwapped.xor(higherAdder);
+		Integer res = intFromBitSet(lowerAdder) + intFromBitSet(higherAdder);
+		resultSwapped = bitSetFromInt(res);
 	}
 
 	public boolean check()
 	{
-		return false;
+		System.out.println(intFromBitSet(result));
+		System.out.println(intFromBitSet(resultSwapped));
+		return (result.equals(resultSwapped));
 	}
 
 	public void nextStep()
@@ -104,46 +107,63 @@ public class Reswo
 			case(1): 
 			{
 				split();
+				step = "Dzielenie liczb na 2 po³ówki";
 				break;
 			}
 			case(2): 
 			{
 				addHigh();
+				step = "Dodawanie wy¿szych po³ówek";
 				break;
 			}
 			case(3): 
 			{
 				addLow();
+				step = "Dodawanie ni¿szych po³ówek";
 				break;
 			}
 			case(4): 
 			{
 				add();
+				step = "Sumowanie dodanych po³ówek";
 				break;
 			}
 			case(6): 
 			{
 				swapOperands();
+				step = "Zamiana pó³ówek miejscami";
 				break;
 			}
 			case(7): 
 			{
 				addHigh();
+				step = "Dodawanie wy¿szych po³ówek";
 				break;
 			}
 			case(8): 
 			{
 				addLow();
+				step = "Dodawanie ni¿szych po³ówek";
 				break;
 			}
 			case(9): 
 			{
 				addSwapped();
+				step = "Sumowanie dodanych zamienionych po³ówek";
 				break;
 			}
 			case(10): 
 			{
-				check();
+				boolean equal = check();
+				if (equal)
+				{
+					step = "Sprawdzanie, czy obie zsumowane liczby siê zgadzaj¹: TAK";
+				}
+				else
+				{
+					step = "Sprawdzanie, czy obie zsumowane liczby siê zgadzaj¹: NIE";
+				}
+
 				break;
 			}
 			case(11): 
@@ -154,9 +174,9 @@ public class Reswo
 		}
 	}
 
-	public static BitSet bitSetFromInt(Integer value)
+	public static FixedSizeBitSet bitSetFromInt(Integer value)
 	{
-	    BitSet bits = new BitSet();
+		FixedSizeBitSet bits = new FixedSizeBitSet(32);
 	    int index = 0;
 	    while (value != 0) {
 	      if (value % 2 != 0) {
@@ -167,8 +187,10 @@ public class Reswo
 	    }
 	    return bits;
 	  }
+	
+	
 
-	public static Integer intFromBitSet(BitSet bits)
+	public static Integer intFromBitSet(FixedSizeBitSet bits)
 	{
 	    int value = 0;
 	    for (int i = 0; i < bits.length(); ++i) {
